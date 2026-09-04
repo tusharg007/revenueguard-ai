@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-import redis.asyncio as redis
 from fastapi import Depends, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -35,6 +34,7 @@ from backend.gateway_health.circuit_breaker import GatewayCircuitBreaker
 from backend.gateway_health.downtime_monitor import DowntimeMonitor
 from backend.integrations.normalizer import _classify_failure
 from backend.models.enums import EventStatus
+from backend.redis_client import create_redis_client
 from backend.webhooks.checkout_api import router as checkout_router
 from backend.webhooks.razorpay_handler import router as razorpay_router
 from data.generator import SyntheticDataGenerator
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
 
     app.state.redis = None
     app.state.event_listener = None
-    candidate = redis.from_url(
+    candidate = create_redis_client(
         get_settings().REDIS_URL,
         decode_responses=True,
         socket_connect_timeout=0.25,

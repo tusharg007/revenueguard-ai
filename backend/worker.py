@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-import redis.asyncio as redis
+from redis.exceptions import TimeoutError as RedisTimeoutError
 from sqlalchemy import select
 
 from backend.agents.graph import build_recovery_graph
@@ -24,6 +24,7 @@ from backend.db.orm_models import (
     RecoveryCase,
 )
 from backend.models.enums import EventStatus
+from backend.redis_client import create_redis_client
 
 
 logger = logging.getLogger(__name__)
@@ -76,17 +77,20 @@ async def process_case(case_id: str, redis_client: Any | None = None) -> None:
 async def worker_loop() -> None:
     """Block on Redis BRPOP and process recovery jobs one at a time."""
     database.init_engine()
-    client = redis.from_url(
+    client = create_redis_client(
         get_settings().REDIS_URL,
         decode_responses=True,
         socket_connect_timeout=1.0,
-        socket_timeout=5.0,
+        socket_timeout=10.0,
     )
     try:
         await client.ping()
         print("RevenueGuard worker listening on recovery_queue")
         while True:
-            item = await client.brpop("recovery_queue", timeout=5)
+            try:
+                item = await client.brpop("recovery_queue", timeout=5)
+            except RedisTimeoutError:
+                continue
             if item is None:
                 continue
             _, case_id = item
@@ -213,6 +217,9 @@ async def _persist_result(case: RecoveryCase, result: dict, db) -> None:
                     idempotency_key=action["idempotency_key"],
                 )
             )
+
+    # Audit entries can reference newly created actions through a foreign key.
+    await db.flush()
 
     for audit in result.get("audit_trail", []):
         db.add(

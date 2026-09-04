@@ -2,7 +2,6 @@ import json
 import logging
 from uuid import uuid4
 
-import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
@@ -12,6 +11,7 @@ from backend.config import get_settings
 from backend.db.database import get_db
 from backend.db.orm_models import RecoveryCase, WebhookEvent
 from backend.models.enums import EventStatus
+from backend.redis_client import create_redis_client
 from backend.integrations.normalizer import normalize_razorpay_event
 from backend.integrations.razorpay_client import verify_webhook_signature
 
@@ -120,9 +120,9 @@ async def handle_razorpay_webhook(
 
         # Enqueue to Redis for background processing
         try:
-            redis = aioredis.from_url(settings.REDIS_URL)
-            await redis.lpush("recovery_queue", normalized.case_id)
-            await redis.aclose()
+            redis_client = create_redis_client(settings.REDIS_URL)
+            await redis_client.lpush("recovery_queue", normalized.case_id)
+            await redis_client.aclose()
         except Exception as e:
             logger.warning(f"Redis enqueue failed (will process later): {e}")
 

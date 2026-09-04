@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import redis.asyncio as redis
-
 from backend.agents.common import append_audit, metadata_from_case
 from backend.agents.state import RecoveryState
 from backend.config import get_settings
@@ -14,6 +12,7 @@ from backend.gateway_health.circuit_breaker import GatewayCircuitBreaker
 from backend.gateway_health.downtime_monitor import DowntimeMonitor
 from backend.models.enums import GatewayHealthState
 from backend.models.schemas import GatewayHealthSnapshot
+from backend.redis_client import create_redis_client
 
 
 _redis_client: Any | None = None
@@ -23,7 +22,7 @@ _monitor: DowntimeMonitor | None = None
 def _get_monitor() -> DowntimeMonitor:
     global _monitor, _redis_client
     if _monitor is None:
-        _redis_client = redis.from_url(
+        _redis_client = create_redis_client(
             get_settings().REDIS_URL,
             decode_responses=True,
             socket_connect_timeout=0.25,
