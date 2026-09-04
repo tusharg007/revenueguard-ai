@@ -133,7 +133,7 @@ export default function SandboxPage() {
         merchant_id: "demo_merchant",
       },
       theme: { color: "#0f766e" },
-      handler: (_response: Record<string, unknown>) => {
+      handler: () => {
         setPaymentResult("success");
         setCheckoutOpened(true);
       },
