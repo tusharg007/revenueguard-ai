@@ -1,81 +1,51 @@
-services:
-  - type: web
-    name: revenueguard-api
-    runtime: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: revenueguard-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: revenueguard-redis
-          property: connectionString
-      - key: GROQ_API_KEY
-        sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
-        sync: false
-      - key: HIGH_VALUE_THRESHOLD
-        value: "5000000"
-      - key: MAX_RETRY_ATTEMPTS
-        value: "3"
-      - key: EXPERIMENT_VARIANT_PCT
-        value: "20"
-      - key: N8N_APPROVAL_WEBHOOK_URL
-        sync: false
-
-  - type: worker
-    name: revenueguard-worker
-    runtime: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    dockerCommand: python -m backend.worker
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: revenueguard-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: revenueguard-redis
-          property: connectionString
-      - key: GROQ_API_KEY
-        sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
-        sync: false
-      - key: HIGH_VALUE_THRESHOLD
-        value: "5000000"
-      - key: MAX_RETRY_ATTEMPTS
-        value: "3"
-      - key: EXPERIMENT_VARIANT_PCT
-        value: "20"
-      - key: N8N_APPROVAL_WEBHOOK_URL
-        sync: false
-
-  - type: keyvalue
-    name: revenueguard-redis
-    plan: free
-    ipAllowList: []
-    maxmemoryPolicy: allkeys-lru
-
-databases:
-  - name: revenueguard-db
-    plan: free
-    databaseName: revenueguard
-    user: revenueguard
+# RevenueGuard AI — Deployment Configuration
+#
+# PRIMARY FREE STACK (see github_deployment_prompts.md):
+#   Frontend:  Vercel         → https://vercel.com
+#   API:       Koyeb          → https://app.koyeb.com (Docker, port 8000)
+#   Worker:    Koyeb (worker) → same Docker image, cmd: python -m backend.worker
+#   Postgres:  Neon           → https://neon.tech (free 512MB, ap-south-1)
+#   Redis:     Upstash        → https://console.upstash.com (free, rediss:// TLS)
+#
+# ENVIRONMENT VARIABLES REQUIRED:
+#   APP_ENV=production
+#   DATABASE_URL=postgresql://...  (Neon pooled URL — app auto-converts to asyncpg)
+#   REDIS_URL=rediss://...         (Upstash TLS URL — redis.asyncio handles natively)
+#   GROQ_API_KEY=...
+#   LLM_PROVIDER=groq
+#   LLM_MODEL=llama-3.3-70b-versatile
+#   RAZORPAY_KEY_ID=rzp_test_...
+#   RAZORPAY_KEY_SECRET=...
+#   RAZORPAY_WEBHOOK_SECRET=...    (also set in Razorpay dashboard → Webhooks)
+#   HIGH_VALUE_THRESHOLD=5000000
+#   MAX_RETRY_ATTEMPTS=3
+#   COOLDOWN_HOURS=24
+#   QUIET_HOURS_START=21
+#   QUIET_HOURS_END=9
+#   EXPERIMENT_VARIANT_PCT=20
+#
+# RAZORPAY WEBHOOK URL (register in Razorpay dashboard → Settings → Webhooks):
+#   https://<your-koyeb-subdomain>.koyeb.app/webhooks/razorpay
+#   Events: payment.failed, subscription.halted, subscription.pending
+#
+# DOCKER (local):
+#   docker compose up -d   # starts Postgres + Redis locally
+#   uvicorn backend.api.main:app --reload --port 8000
+#   python -m backend.worker
+#
+# RENDER (alternative — if you have a Render account):
+# services:
+#   - type: web
+#     name: revenueguard-api
+#     runtime: docker
+#     envVars: [add the vars above manually in dashboard]
+#   - type: worker
+#     name: revenueguard-worker
+#     runtime: docker
+#     dockerCommand: python -m backend.worker
+# databases:
+#   - name: revenueguard-db
+#     plan: free
+# keyValueStores:
+#   - name: revenueguard-redis
+#     plan: free
