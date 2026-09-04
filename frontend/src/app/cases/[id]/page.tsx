@@ -2,12 +2,6 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CaseDetailPage from "./case-detail-client";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return [{ id: "demo" }];
-}
-
 export default function Page({ params }: { params: { id: string } }) {
   return (
     <Suspense fallback={<CaseDetailFallback />}>
