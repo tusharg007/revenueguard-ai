@@ -1,216 +1,274 @@
-# RevenueGuard AI — Intelligent Payment Recovery Agent
+# RevenueGuard AI
 
-> **Razorpay AI Buildathon 2026 · Track 03: AI Revenue Recovery**
+> Razorpay AI Buildathon 2026 · Track 03: AI Revenue Recovery
 
-An agentic system that detects failed Indian payments, scores recovery probability with ML, reasons about root cause with an LLM, and executes the optimal intervention — all within Razorpay's test-mode infrastructure.
+RevenueGuard AI turns failed-payment events into explainable, policy-safe recovery actions. It combines ML triage, gateway-health intelligence, a LangGraph decision agent, deterministic guardrails, human approval for high-value cases, and an A/B evaluation framework.
 
-[![Demo Video](https://img.shields.io/badge/Demo-5%20min%20video-red?style=for-the-badge&logo=youtube)](https://your-video-link-here)
-[![Live Dashboard](https://img.shields.io/badge/Dashboard-Vercel-teal?style=for-the-badge)](https://revenueguard-ai-five.vercel.app)
-[![API](https://img.shields.io/badge/API-Render-blue?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/api/health)
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Vercel-00897B?style=for-the-badge)](https://revenueguard-ai-five.vercel.app)
+[![API Health](https://img.shields.io/badge/API-Healthy-2563EB?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/api/health)
+[![API Docs](https://img.shields.io/badge/OpenAPI-Docs-6B7280?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/docs)
+[![Repository](https://img.shields.io/badge/Source-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/tusharg007/revenueguard-ai)
 
----
+> **Demo video:** upload pending. The final unlisted YouTube link will be placed here before submission.
 
-## The Problem
+## Product in one sentence
 
-₹2.4 trillion in Indian digital payments fail annually. Most merchants have no recovery strategy beyond hoping the customer retries. The failure reasons matter: a bank timeout (SYSTEMIC) needs a delayed retry. Insufficient funds (CUSTOMER) needs a nudge. A business rule block (BUSINESS) needs human review. Treating them all the same wastes money and annoys customers.
+A recovery operations layer that understands *why* a payment failed, predicts whether recovery is likely, chooses the safest next action, and records evidence for every decision.
 
----
+## Why it matters
 
-## Architecture
+Payment failures are not interchangeable. A bank timeout should be deferred until the rail stabilizes; insufficient funds should trigger a respectful customer nudge; a business-rule failure may need human review. Blindly retrying every failure wastes gateway calls, increases customer fatigue, and gives operations teams no defensible audit trail.
 
-```mermaid
+RevenueGuard AI addresses that gap with:
+
+- probability-based triage and SHAP reason codes;
+- systemic, customer, and business failure classification;
+- gateway circuit breakers that suppress harmful retries;
+- deterministic policy checks before any action;
+- human-in-the-loop approval above ₹50,000;
+- stable control/treatment assignment and statistical reporting.
+
+## Live proof
+
+These screenshots are captured from the deployed Vercel application backed by the public Render API. They are not design mockups.
+
+![Recovery operations dashboard](docs/screenshots/dashboard.png)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/cases.png" alt="Payment failure case queue"></td>
+<td width="50%"><img src="docs/screenshots/sandbox.png" alt="Razorpay test-mode sandbox"></td>
+</tr>
+</table>
+
+- [Open the live control room](https://revenueguard-ai-five.vercel.app)
+- [Inspect API health](https://revenueguard-ai-2.onrender.com/api/health)
+- [Explore interactive OpenAPI docs](https://revenueguard-ai-2.onrender.com/docs)
+- [View the public source repository](https://github.com/tusharg007/revenueguard-ai)
+
+Render's free service may cold-start; allow roughly 15–30 seconds on the first request, then refresh the dashboard once.
+
+## System architecture
+
+~~~mermaid
 flowchart TD
-    subgraph Intake
-        RZ[Razorpay Webhook] -->|HMAC verify + dedupe| API[FastAPI]
-        API --> DB[(PostgreSQL)]
-        API --> Q[(Redis Queue)]
-    end
+    RZ[Razorpay webhook] -->|HMAC verification + idempotency| API[FastAPI]
+    API --> DB[(PostgreSQL)]
+    API --> Q[(Redis queue)]
+    Q --> W[Recovery worker]
+    W --> ML[LightGBM triage + SHAP]
+    W --> GH[Gateway health + circuit breaker]
+    ML --> EXP[A/B assignment]
+    GH --> EXP
+    EXP -->|Control| BL[Fixed retry baseline]
+    EXP -->|Treatment| AG[LangGraph recovery agent]
+    AG --> D[Diagnosis]
+    D --> S[Strategy]
+    S --> CH[Channel selection]
+    CH --> PE[Policy engine]
+    PE -->|amount > ₹50K| HITL[Human approval]
+    PE --> EX[Execute or simulate]
+    HITL --> EX
+    API --> UI[Next.js operations dashboard]
+~~~
 
-    subgraph Recovery Pipeline
-        Q --> W[Worker - BRPOP]
-        W --> ML[LightGBM Triage\nSHAP reason codes]
-        W --> GH[Gateway Health\nRedis sliding windows\nCircuit breaker]
-        ML & GH --> EXP[A/B Assignment\nMD5 deterministic]
-        EXP -->|CONTROL 80%| BL[Naive Retry\nBaseline]
-        EXP -->|TREATMENT 20%| AG[LangGraph Agent]
-        AG --> D[Diagnose\nGroq GPT-OSS]
-        D --> S[Strategize\nDeterministic overrides first]
-        S --> CH[Channel\nThompson Sampling]
-        CH --> PE[Policy Engine\n6 guardrail checks]
-        PE -->|>₹50K| HITL[HITL Approval\nn8n webhook]
-        PE --> EX[Execute\nPayment link / Retry / Nudge]
-    end
+### Decision path
 
-    subgraph Observability
-        API --> UI[Next.js 14 Dashboard]
-        UI --> CR[Control Room]
-        UI --> SB[Razorpay Sandbox]
-        UI --> AB[A/B Experiments]
-        UI --> GHV[Gateway Health Map]
-    end
-```
+1. Verify and deduplicate the failure event.
+2. Persist the recovery case before queueing it.
+3. Score recovery probability and produce human-readable reason codes.
+4. Fuse internal failure windows with Razorpay gateway signals.
+5. Assign the case to a stable control or treatment arm.
+6. Select a recovery strategy, channel, and timing.
+7. apply deterministic guardrails and high-value approval.
+8. Execute, audit, and publish live status updates.
 
----
+## Evaluation evidence
 
-## Eval Results (on 523 held-out test events)
+Offline evaluation uses 523 held-out synthetic events committed with the repository. These results are separate from the small live demo sample shown in the dashboard.
 
-| Metric | Value |
+| Metric | Result |
+|---|---:|
+| Precision | **80.2%** |
+| Recall | **80.5%** |
+| F1 score | **80.3%** |
+| Treatment recovery rate | **47.5%** (122 cases) |
+| Control recovery rate | 37.7% (401 cases) |
+| Absolute lift | **+9.9 percentage points** |
+| Relative lift | **+26.3%** |
+| One-sided p-value | **0.025** |
+| Sample-ratio-mismatch check | **Pass** (χ² 3.62, p 0.057) |
+
+Reproducible artifacts:
+
+- [Evaluation summary](evals/results/summary.json)
+- [Per-case results](evals/results/rows.json)
+- [Held-out event batch](data/test_batch.json)
+- [Trained model artifacts](models)
+
+## Technology
+
+| Layer | Implementation |
 |---|---|
-| **Precision** | **80.2%** |
-| **Recall** | **80.5%** |
-| **F1 Score** | **80.3%** |
-| False Positive Cost | ₹20.25 |
-| Agent Recovery Rate | **47.5%** (treatment arm, 122 cases) |
-| Baseline Recovery Rate | 37.7% (control arm, 401 cases) |
-| **Absolute Lift** | **+9.9 percentage points** |
-| **Relative Lift** | **+26.3%** |
-| P-value | **0.025** (significant at α=0.05) |
-| SRM Check | ✅ PASS (χ²=3.62, p=0.057) |
+| Agent | LangGraph StateGraph |
+| Language model | Groq GPT-OSS 120B; OpenRouter fallback |
+| ML and explainability | LightGBM, XGBoost, scikit-learn, SHAP |
+| Channel optimization | Thompson Sampling with MABWiser |
+| API | FastAPI, Pydantic v2, async SQLAlchemy |
+| Data | PostgreSQL/Neon in production; SQLite for lightweight local development |
+| Queue and health windows | Redis/Upstash |
+| Frontend | Next.js 14, React Query, Recharts, Tailwind CSS |
+| Payments | Official Razorpay Python SDK and signed webhooks |
+| Hosting | Vercel frontend, Render API, Neon Postgres, Upstash Redis |
 
-> Eval artifacts: [`evals/results/summary.json`](evals/results/summary.json) · [`evals/results/rows.json`](evals/results/rows.json)
+## Run locally
 
----
+### Prerequisites
 
-## Features
+- Python 3.11
+- Node.js 20 and npm
+- Docker Desktop, for PostgreSQL and Redis
+- Optional: Groq and Razorpay test credentials for the full agent and checkout paths
 
-### Core Intelligence
-- **ML Triage**: LightGBM champion + XGBoost challenger + calibrated LogReg baseline. SHAP reason codes (RC01–RC05) make every score explainable.
-- **Failure Classification**: Separates SYSTEMIC (bank timeout → defer), CUSTOMER (insufficient funds → nudge), BUSINESS (rule violation → escalate). Critical for not wasting retries.
-- **LangGraph Agent**: 10-node StateGraph — triage → gateway health → A/B assign → diagnose → strategize → channel select → policy check → HITL → execute → audit.
+### 1. Clone and configure
 
-### Infrastructure
-- **Gateway Health Engine**: Redis sorted-set sliding windows (5m/15m/60m) per bank/rail. Resilience4j-style 3-state circuit breaker (CLOSED/OPEN/HALF_OPEN) with exponential backoff.
-- **A/B Experiment Framework**: Deterministic MD5 hashing for stable assignment. Two-proportion Z-test + SRM detection via scipy/statsmodels.
-- **Thompson Sampling MAB**: MABWiser per customer segment (language × LTV × WhatsApp eligibility). `partial_fit()` on delayed recovery outcomes.
-- **HITL Gate**: Deterministic `amount > ₹50,000` trigger. Creates approval record with 2h expiry. n8n Cloud webhook + dashboard approve/reject buttons.
+    git clone https://github.com/tusharg007/revenueguard-ai.git
+    cd revenueguard-ai
 
-### Real Razorpay Integration
-- Live test-mode order creation via official Python SDK
-- HMAC-SHA256 webhook verification (raw body read before JSON parse)
-- Idempotency via `x-razorpay-event-id`
-- Razorpay downtime API fused with internal circuit breaker
-- Payment link creation for recovery
+macOS/Linux:
 
----
+    cp .env.example .env
 
-## Tech Stack
+Windows PowerShell:
 
-| Layer | Technology |
-|---|---|
-| **LLM** | Groq `openai/gpt-oss-120b` · OpenRouter fallback |
-| **Agent** | LangGraph StateGraph |
-| **ML** | LightGBM · XGBoost · scikit-learn · SHAP |
-| **MAB** | MABWiser Thompson Sampling |
-| **API** | FastAPI · Pydantic v2 · SQLAlchemy async |
-| **DB** | PostgreSQL (prod) · SQLite+aiosqlite (dev) |
-| **Queue** | Redis Lists (LPUSH/BRPOP) |
-| **Frontend** | Next.js 14 App Router · Tailwind CSS v4 · shadcn/ui · Recharts · React Query |
-| **Payments** | Razorpay Python SDK |
-| **Deploy** | Render Blueprint · Vercel · Docker multi-stage |
+    Copy-Item .env.example .env
 
----
+For Docker-backed local infrastructure, set these values in **.env**:
 
-## Quick Start (Local)
+    DATABASE_URL=postgresql+asyncpg://revenueguard:revenueguard@localhost:5432/revenueguard
+    REDIS_URL=redis://localhost:6379
 
-```bash
-# 1. Clone and install
-git clone https://github.com/YOUR_USERNAME/revenueguard-ai.git
-cd revenueguard-ai
-cp .env.example .env        # Fill in GROQ_API_KEY + RAZORPAY keys
+Simulation and read-only dashboard paths work without Razorpay credentials. Add **GROQ_API_KEY** for LLM reasoning and Razorpay test keys for checkout/webhook demonstrations.
 
-pip install -r requirements.txt
+### 2. Install and start infrastructure
 
-# 2. Start infrastructure
-docker compose up -d        # PostgreSQL + Redis
+    python -m venv .venv
 
-# 3. Start backend
-uvicorn backend.api.main:app --reload --port 8000
+macOS/Linux:
 
-# 4. Start worker (separate terminal)
-python -m backend.worker
+    source .venv/bin/activate
 
-# 5. Start frontend (separate terminal)
-cd frontend && npm install && npm run dev
-# → http://localhost:3000
+Windows PowerShell:
 
-# 6. Generate synthetic data & run evals
-python -m data.generate_batch --output data/test_batch.json --count 523
-python -m evals.batch_runner
-```
+    .\.venv\Scripts\Activate.ps1
 
----
+Then:
 
-## Simulate Recovery (No Razorpay Keys Needed)
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+    docker compose up -d
 
-```bash
-# Inject 50 synthetic failures and run the full pipeline
-curl -X POST http://localhost:8000/api/simulate/batch -H "Content-Type: application/json" -d '{"count": 50}'
+### 3. Start the services
 
-# Simulate a gateway outage (trips SBI UPI circuit breaker to OPEN)
-curl -X POST http://localhost:8000/api/simulate/outage -H "Content-Type: application/json" -d '{"bank": "SBI", "rail": "upi"}'
-```
+Terminal 1 — API:
 
----
+    uvicorn backend.api.main:app --reload --port 8000
 
-## What Broke (Honest Postmortem)
+Terminal 2 — worker:
 
-**Razorpay webhook blacklist** — Razorpay blocks ngrok, webhook.site, and requestbin. Discovered this at midnight when test webhooks silently dropped. Fix: deployed to Render immediately to get a real public URL.
+    python -m backend.worker
 
-**MABWiser cold start** — Thompson Sampling needs real outcome data over days to converge. In a 48-hour hackathon, the bandit stays near-uniform. Mitigation: warm-started with 1 success + 1 failure per arm so it doesn't collapse to a single channel immediately.
+Terminal 3 — frontend:
 
-**SQLite and async** — SQLAlchemy's async driver for SQLite requires `check_same_thread=False` and `aiosqlite` — not the same flags as sync SQLite. Lost ~2 hours debugging `sqlite3.ProgrammingError`. Fix: documented in `backend/db/database.py`.
+    cd frontend
+    npm ci
+    npm run dev
 
-**LightGBM on Windows** — `lightgbm` wheel on Windows 11 requires Visual C++ 2019 runtime. Not in `requirements.txt`. Added `lightgbm>=4.0.0` with a note in README.
+Open [http://localhost:3000](http://localhost:3000). API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-**SHAP + LightGBM shape mismatch** — `shap.TreeExplainer` returns `(1, n_features, 2)` for binary classification. Had to squeeze the last dimension. Fixed in `triage_model.py:_get_shap_values()`.
+### 4. Verify the stack
 
-**What we'd harden next**: Real customer contact via Razorpay Smart Collect + WhatsApp Business API. Persistent MAB state in Redis (currently in-memory, resets on restart). Proper Alembic migrations instead of `create_all`.
+    curl http://localhost:8000/api/health
+    curl -X POST http://localhost:8000/api/simulate/batch -H "Content-Type: application/json" -d "{\"count\": 25}"
 
----
+The worker should consume queued cases while the control room updates.
 
-## Deployment (Render + Vercel)
+Full setup and deployment notes: [docs/SETUP_AND_DEPLOYMENT.md](docs/SETUP_AND_DEPLOYMENT.md)
 
-**Backend + Worker + DB + Redis → Render Blueprint**
-```bash
-# In Render dashboard: New → Blueprint → Connect repo
-# render.yaml provisions everything automatically
-# Add secrets: GROQ_API_KEY, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
-```
+## Public API surface
 
-**Frontend → Vercel**
-```bash
-# In Vercel: New Project → Import repo → Root directory: frontend
-# Add env var: NEXT_PUBLIC_API_URL=https://revenueguard-api.onrender.com
-```
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | **/api/health** | Liveness and environment |
+| GET | **/api/metrics** | Recovery operations summary |
+| GET | **/api/cases** | Paginated, filterable recovery cases |
+| GET | **/api/cases/{case_id}** | Decision trace, actions, approvals, audit trail |
+| GET | **/api/gateway-health** | Gateway and circuit-breaker snapshots |
+| GET | **/api/experiments/{id}/results** | Control/treatment statistics |
+| POST | **/api/simulate/batch** | Inject synthetic payment failures |
+| POST | **/api/simulate/outage** | Generate a controlled gateway outage |
+| POST | **/webhooks/razorpay** | Signed Razorpay webhook intake |
+| WS | **/ws/events** | Live dashboard event stream |
 
-**After deploy — register webhook in Razorpay Dashboard:**
-```
-URL: https://revenueguard-api.onrender.com/webhooks/razorpay
-Events: payment.failed, subscription.halted, subscription.pending
-```
+## Deployment
 
----
+The checked-in Dockerfile packages the Python API and worker code. The current public demo uses:
 
-## Project Structure
+- **Vercel:** frontend, root directory **frontend**
+- **Render:** Docker web service running the FastAPI command
+- **Neon:** pooled PostgreSQL connection
+- **Upstash:** TLS Redis connection
+- **Local/managed worker:** **python -m backend.worker**
 
-```
-revenueguard-ai/
-├── backend/
-│   ├── agents/          # LangGraph nodes (triage, diagnose, strategize, channel, execute)
-│   ├── api/             # FastAPI app + WebSocket event manager
-│   ├── db/              # SQLAlchemy ORM models + async engine
-│   ├── experiments/     # A/B assignment, baseline, statistical analyzer
-│   ├── gateway_health/  # Redis aggregator + circuit breaker + downtime monitor
-│   ├── guardrails/      # Policy engine + HITL gate
-│   ├── integrations/    # Razorpay SDK wrapper + failure normalizer
-│   ├── ml/              # Feature engineering, train, triage scorer, MAB bandit
-│   ├── models/          # Enums, Pydantic schemas
-│   └── webhooks/        # Razorpay handler + checkout API
-├── data/                # Synthetic data generator + test_batch.json (523 events)
-├── evals/               # Batch evaluator + results (summary.json, rows.json)
-├── frontend/            # Next.js 14 dashboard (6 pages)
-├── models/              # Trained ML artifacts (LightGBM + SHAP, ~980KB)
-├── docker-compose.yml   # PostgreSQL + Redis for local dev
-├── Dockerfile           # Multi-stage (Next.js → Python)
-└── render.yaml          # Render Blueprint for one-click deploy
-```
+Required production environment variables are documented in [.env.example](.env.example). Never commit real keys.
+
+For Vercel, set:
+
+    NEXT_PUBLIC_API_URL=https://revenueguard-ai-2.onrender.com
+
+The frontend also contains the public Render URL as a production fallback so a missing Vercel variable cannot silently point judges to localhost.
+
+Register the Razorpay test webhook at:
+
+    https://revenueguard-ai-2.onrender.com/webhooks/razorpay
+
+Enable the **payment.failed** event and use the same signing secret as **RAZORPAY_WEBHOOK_SECRET**.
+
+## Safety and trust
+
+- Raw webhook bodies are HMAC-SHA256 verified before parsing.
+- Razorpay event IDs provide idempotency.
+- Cases are committed before queueing, preventing worker read races.
+- High-value actions require approval.
+- Quiet hours, retry caps, cooldowns, and gateway state are enforced deterministically.
+- Public customer responses exclude internal recovery context.
+- Credentials are environment variables and ignored by Git.
+
+## Honest limitations
+
+- The hosted free API can cold-start.
+- A continuously running worker is not included in the free Render web service; the demo worker is run separately.
+- Thompson Sampling needs sustained outcome history to converge; the hackathon build is warm-started.
+- Customer delivery integrations remain sandbox/simulated where provider approval is required.
+- Database migrations should replace **create_all** before production use.
+
+## Repository map
+
+    backend/                 FastAPI, agent graph, policies, worker, integrations
+    data/                    Synthetic generator and held-out event batch
+    evals/                   Batch evaluator and committed results
+    frontend/                Next.js operations dashboard
+    models/                  Trained model and explainability artifacts
+    tests/                   Regression tests for enqueueing, timestamps, strategy
+    docs/                    Setup, deployment, recording guide, screenshots
+    Dockerfile               Production API image
+    docker-compose.yml       Local PostgreSQL and Redis
+    render.yaml              Render deployment reference
+
+## Demo recording
+
+The recommended submission workflow is **OBS Studio + your own narration + YouTube Unlisted**. It avoids Loom's hard five-minute cutoff and keeps the final link accessible to judges. Use the exact checklist in [docs/DEMO_VIDEO_GUIDE.md](docs/DEMO_VIDEO_GUIDE.md).
+
+## License
+
+Released under the [MIT License](LICENSE).
