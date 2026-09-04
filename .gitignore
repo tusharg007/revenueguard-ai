@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Environment — NEVER commit real .env
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Frontend
+node_modules/
+.next/
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+.pnpm-store/
+
+# SQLite dev database (use Postgres in prod)
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+logs/
+
+# Redis
+dump.rdb
+
+# Alembic migrations cache
+backend/db/versions/*.pyc
+
+# Docker override
+docker-compose.override.yml
+
+# n8n local data
+n8n/data/
+
+# NOTE: The following are intentionally TRACKED (they are evidence):
+# - models/*.joblib, models/*.json  (trained ML artifacts ~980KB)
+# - data/test_batch.json            (523-event eval dataset)
+# - evals/results/summary.json      (precision/recall/F1 results)
+# - evals/results/rows.json         (per-case predictions)

@@ -1,0 +1,21 @@
+[
+  "amount_paise",
+  "amount_log",
+  "amount_bucket",
+  "failure_category",
+  "failure_source",
+  "payment_method",
+  "bank_encoded",
+  "error_reason_encoded",
+  "hour_of_day",
+  "day_of_week",
+  "is_peak_hours",
+  "customer_lifetime_value_log",
+  "customer_total_transactions",
+  "customer_failed_transactions",
+  "customer_failure_rate",
+  "customer_opted_out",
+  "gateway_health_score",
+  "gateway_is_degraded",
+  "prior_retry_count"
+]

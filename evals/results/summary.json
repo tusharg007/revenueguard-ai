@@ -1,0 +1,45 @@
+{
+  "total_events": 523,
+  "revenue_at_risk_paise": 326561176,
+  "true_positives": 231,
+  "false_positives": 57,
+  "false_negatives": 56,
+  "true_negatives": 179,
+  "precision": 0.8020833333333334,
+  "recall": 0.8048780487804879,
+  "f1": 0.8034782608695653,
+  "simulated_recovery_paise": 96226477,
+  "simulated_recovery_rate": 0.2946660046324674,
+  "false_positive_cost_paise": 2025,
+  "experiment": {
+    "experiment_id": "recovery_agent_v1",
+    "control": {
+      "recovered": 151,
+      "total": 401,
+      "recovery_rate": 0.3765586034912718
+    },
+    "variant": {
+      "recovered": 58,
+      "total": 122,
+      "recovery_rate": 0.47540983606557374
+    },
+    "sample_size": 523,
+    "sample_size_control": 401,
+    "sample_size_variant": 122,
+    "control_rate": 0.3765586034912718,
+    "variant_rate": 0.47540983606557374,
+    "absolute_lift": 0.09885123257430195,
+    "relative_lift": 0.26251221365758337,
+    "ci_lower": -0.0016580932585261443,
+    "ci_upper": 0.19936055840713005,
+    "z_statistic": 1.9518528263487036,
+    "p_value": 0.025477840174887145,
+    "is_significant": true,
+    "srm": {
+      "chi_square": 3.6180688336520075,
+      "p_value": 0.0571551818363706,
+      "pass": true
+    },
+    "srm_pass": true
+  }
+}
