@@ -36,11 +36,21 @@ Output ONLY valid JSON:
 {{"action_type": "SMART_RETRY", "reasoning": "...", \
 "retry_delay_seconds": 0, "message_content": null}}"""
 
-    payload = parse_json_response(await get_llm().ainvoke(prompt))
-    payload.pop("recovery_probability", None)
-    payload["action_type"] = str(payload.get("action_type", "stop")).lower()
+    payload = _normalize_strategy_payload(
+        parse_json_response(await get_llm().ainvoke(prompt))
+    )
     decision = StrategyDecision(**payload)
     return _strategy_result(state, decision, "LLM selected an action within the fixed action set.")
+
+
+def _normalize_strategy_payload(payload: dict) -> dict:
+    payload = dict(payload)
+    payload.pop("recovery_probability", None)
+    payload["action_type"] = str(payload.get("action_type", "stop")).lower()
+    payload["retry_delay_seconds"] = max(
+        0, int(payload.get("retry_delay_seconds") or 0)
+    )
+    return payload
 
 
 def _deterministic_override(state: RecoveryState) -> StrategyDecision | None:
