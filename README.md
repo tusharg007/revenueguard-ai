@@ -41,6 +41,8 @@ These screenshots are captured from the deployed Vercel application backed by th
 </tr>
 </table>
 
+![Explainable recovery-case decision trace](docs/screenshots/case-detail.png)
+
 - [Open the live control room](https://revenueguard-ai-five.vercel.app)
 - [Inspect API health](https://revenueguard-ai-2.onrender.com/api/health)
 - [Explore interactive OpenAPI docs](https://revenueguard-ai-2.onrender.com/docs)
