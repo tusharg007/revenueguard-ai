@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
-    DateTime,
     Float,
     ForeignKey,
     Index,
@@ -16,6 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.db.database import Base
+from backend.db.types import UTCDateTime
 
 
 def _uuid() -> str:
@@ -35,8 +35,8 @@ class WebhookEvent(Base):
     payment_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     order_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     raw_payload: Mapped[dict] = mapped_column(JSON, nullable=False)
-    received_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
-    processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    received_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
+    processed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     signature_valid: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
@@ -69,11 +69,11 @@ class RecoveryCase(Base):
     experiment_arm: Mapped[str | None] = mapped_column(String(20), nullable=True)
     gateway_health_state: Mapped[str | None] = mapped_column(String(20), nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, default=0)
-    last_retry_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    recovered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_retry_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    recovered_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     recovered_amount_paise: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime, onupdate=_now, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
+    updated_at: Mapped[datetime | None] = mapped_column(UTCDateTime, onupdate=_now, nullable=True)
 
 
 class RecoveryActionRecord(Base):
@@ -90,7 +90,7 @@ class RecoveryActionRecord(Base):
     output_result: Mapped[dict] = mapped_column(JSON, default=dict)
     cost_paise: Mapped[int] = mapped_column(Integer, default=0)
     idempotency_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class AuditLog(Base):
@@ -110,7 +110,7 @@ class AuditLog(Base):
     reasoning: Mapped[str] = mapped_column(Text, default="")
     guardrails_applied: Mapped[list] = mapped_column(JSON, default=list)
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class GatewayHealthRecord(Base):
@@ -124,7 +124,7 @@ class GatewayHealthRecord(Base):
     technical_failure_rate: Mapped[float] = mapped_column(Float, default=0.0)
     sample_size: Mapped[int] = mapped_column(Integer, default=0)
     snapshot_data: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class Experiment(Base):
@@ -138,7 +138,7 @@ class Experiment(Base):
     variant_version: Mapped[str] = mapped_column(String(100), default="recovery_agent_v1")
     variant_split_pct: Mapped[int] = mapped_column(Integer, default=20)
     min_sample_size: Mapped[int] = mapped_column(Integer, default=1000)
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    started_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class ExperimentAssignmentRecord(Base):
@@ -152,7 +152,7 @@ class ExperimentAssignmentRecord(Base):
         String(50), ForeignKey("recovery_cases.case_id"), nullable=False
     )
     arm: Mapped[str] = mapped_column(String(20), nullable=False)
-    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    assigned_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class ExperimentResultRecord(Base):
@@ -172,7 +172,7 @@ class ExperimentResultRecord(Base):
     is_significant: Mapped[bool] = mapped_column(Boolean, default=False)
     sample_size_control: Mapped[int] = mapped_column(Integer, default=0)
     sample_size_variant: Mapped[int] = mapped_column(Integer, default=0)
-    calculated_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    calculated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
 
 
 class RecoveryApproval(Base):
@@ -188,10 +188,10 @@ class RecoveryApproval(Base):
     requested_action: Mapped[str] = mapped_column(String(50), nullable=False)
     agent_recommendation: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="PENDING")
-    requested_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
-    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    requested_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)
     approved_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     decision_channel: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 
@@ -201,4 +201,4 @@ class ChannelBanditState(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     segment: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     bandit_state: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=_now, onupdate=_now)
