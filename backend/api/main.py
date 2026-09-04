@@ -295,6 +295,7 @@ async def approve(
     approval.approved_by = body.approved_by
     approval.approved_at = datetime.now(timezone.utc)
     approval.decision_channel = "api"
+    await db.commit()
     queued = await _enqueue_case(app.state.redis, approval.case_id)
     return {"approval_id": approval_id, "status": approval.status, "queued": queued}
 
@@ -341,7 +342,7 @@ async def simulate_batch(
             )
         )
         case_ids.append(case_id)
-    await db.flush()
+    await db.commit()
 
     queued = 0
     for case_id in case_ids:

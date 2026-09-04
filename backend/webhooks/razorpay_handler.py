@@ -116,7 +116,7 @@ async def handle_razorpay_webhook(
             merchant_id=normalized.merchant_id,
         )
         db.add(case)
-        await db.flush()  # Ensure case is written before enqueue
+        await db.commit()
 
         # Enqueue to Redis for background processing
         try:
