@@ -97,7 +97,7 @@ flowchart TD
 
 | Layer | Technology |
 |---|---|
-| **LLM** | Groq `llama-3.3-70b-versatile` · OpenRouter fallback |
+| **LLM** | Groq `openai/gpt-oss-120b` · OpenRouter fallback |
 | **Agent** | LangGraph StateGraph |
 | **ML** | LightGBM · XGBoost · scikit-learn · SHAP |
 | **MAB** | MABWiser Thompson Sampling |

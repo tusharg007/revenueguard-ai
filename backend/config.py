@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     OPENROUTER_API_KEY: str = ""
     LLM_PROVIDER: str = "groq"  # "groq" or "openrouter"
-    LLM_MODEL: str = "llama-3.3-70b-versatile"
+    LLM_MODEL: str = "openai/gpt-oss-120b"
 
     # Razorpay
     RAZORPAY_KEY_ID: str = ""
