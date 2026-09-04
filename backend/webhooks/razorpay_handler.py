@@ -11,7 +11,7 @@ from backend.config import get_settings
 from backend.db.database import get_db
 from backend.db.orm_models import RecoveryCase, WebhookEvent
 from backend.models.enums import EventStatus
-from backend.redis_client import create_redis_client
+from backend.redis_client import create_redis_client, enqueue_recovery_case
 from backend.integrations.normalizer import normalize_razorpay_event
 from backend.integrations.razorpay_client import verify_webhook_signature
 
@@ -119,11 +119,19 @@ async def handle_razorpay_webhook(
         await db.commit()
 
         # Enqueue to Redis for background processing
+        redis_client = None
         try:
-            redis_client = create_redis_client(settings.REDIS_URL)
-            await redis_client.lpush("recovery_queue", normalized.case_id)
-            await redis_client.aclose()
+            redis_client = create_redis_client(
+                settings.REDIS_URL,
+                socket_connect_timeout=2.0,
+                socket_timeout=5.0,
+            )
+            if not await enqueue_recovery_case(redis_client, normalized.case_id):
+                logger.warning("Redis enqueue failed after retries for %s", normalized.case_id)
         except Exception as e:
             logger.warning(f"Redis enqueue failed (will process later): {e}")
+        finally:
+            if redis_client is not None:
+                await redis_client.aclose()
 
     return {"ok": True}

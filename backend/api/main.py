@@ -34,7 +34,7 @@ from backend.gateway_health.circuit_breaker import GatewayCircuitBreaker
 from backend.gateway_health.downtime_monitor import DowntimeMonitor
 from backend.integrations.normalizer import _classify_failure
 from backend.models.enums import EventStatus
-from backend.redis_client import create_redis_client
+from backend.redis_client import create_redis_client, enqueue_recovery_case
 from backend.webhooks.checkout_api import router as checkout_router
 from backend.webhooks.razorpay_handler import router as razorpay_router
 from data.generator import SyntheticDataGenerator
@@ -74,8 +74,8 @@ async def lifespan(app: FastAPI):
     candidate = create_redis_client(
         get_settings().REDIS_URL,
         decode_responses=True,
-        socket_connect_timeout=0.25,
-        socket_timeout=0.5,
+        socket_connect_timeout=2.0,
+        socket_timeout=5.0,
     )
     try:
         await candidate.ping()
@@ -296,7 +296,7 @@ async def approve(
     approval.approved_at = datetime.now(timezone.utc)
     approval.decision_channel = "api"
     await db.commit()
-    queued = await _enqueue_case(app.state.redis, approval.case_id)
+    queued = await enqueue_recovery_case(app.state.redis, approval.case_id)
     return {"approval_id": approval_id, "status": approval.status, "queued": queued}
 
 
@@ -346,7 +346,7 @@ async def simulate_batch(
 
     queued = 0
     for case_id in case_ids:
-        if await _enqueue_case(app.state.redis, case_id):
+        if await enqueue_recovery_case(app.state.redis, case_id):
             queued += 1
         await _emit({"type": "case_created", "case_id": case_id})
     return {"created": len(case_ids), "queued": queued, "case_ids": case_ids}
@@ -407,16 +407,6 @@ async def _get_approval_or_404(approval_id: str, db: AsyncSession) -> RecoveryAp
     if approval is None:
         raise HTTPException(status_code=404, detail="Approval not found")
     return approval
-
-
-async def _enqueue_case(redis_client: Any | None, case_id: str) -> bool:
-    if redis_client is None:
-        return False
-    try:
-        await redis_client.lpush("recovery_queue", case_id)
-        return True
-    except Exception:
-        return False
 
 
 async def _emit(event: dict) -> None:

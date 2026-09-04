@@ -25,8 +25,8 @@ def _get_monitor() -> DowntimeMonitor:
         _redis_client = create_redis_client(
             get_settings().REDIS_URL,
             decode_responses=True,
-            socket_connect_timeout=0.25,
-            socket_timeout=0.5,
+            socket_connect_timeout=2.0,
+            socket_timeout=5.0,
         )
         aggregator = GatewayHealthAggregator(_redis_client)
         _monitor = DowntimeMonitor(aggregator, GatewayCircuitBreaker(_redis_client))
