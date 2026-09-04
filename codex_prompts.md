@@ -27,7 +27,7 @@ Pydantic Settings class using pydantic-settings that loads from .env file:
 - GROQ_API_KEY: str = ""
 - OPENROUTER_API_KEY: str = ""
 - LLM_PROVIDER: str = "groq"  # "groq" or "openrouter"
-- LLM_MODEL: str = "llama-3.3-70b-versatile"
+- LLM_MODEL: str = "openai/gpt-oss-120b"
 - RAZORPAY_KEY_ID: str
 - RAZORPAY_KEY_SECRET: str
 - RAZORPAY_WEBHOOK_SECRET: str = ""
@@ -233,7 +233,7 @@ PostgreSQL DDL for all tables. UUID, TIMESTAMPTZ, JSONB, TEXT, INTEGER, FLOAT, B
 GROQ_API_KEY=gsk_your_key_here
 OPENROUTER_API_KEY=sk-or-your_key_here
 LLM_PROVIDER=groq
-LLM_MODEL=llama-3.3-70b-versatile
+LLM_MODEL=openai/gpt-oss-120b
 RAZORPAY_KEY_ID=rzp_test_your_key
 RAZORPAY_KEY_SECRET=your_secret
 RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
@@ -659,7 +659,7 @@ CRITICAL PRINCIPLES:
 - LLM handles: root-cause reasoning, natural-language explanation, message drafting
 - Deterministic components handle: ML scoring, gateway health, experiment assignment, policy enforcement
 - The LLM NEVER outputs the recovery probability. It RECEIVES it as immutable context.
-- LLM provider is Groq (langchain-groq, model llama-3.3-70b-versatile). Fallback: OpenRouter via langchain-openai with custom base_url.
+- LLM provider is Groq (langchain-groq, model openai/gpt-oss-120b). Fallback: OpenRouter via langchain-openai with custom base_url.
 
 ## File 1: backend/agents/__init__.py — Empty
 

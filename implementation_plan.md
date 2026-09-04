@@ -15,7 +15,7 @@
 | 16GB RAM, ~2GB free | No Kafka, no ClickHouse, no separate ML server. SQLite for dev, Postgres only in Docker/deployment |
 | Windows 11 + Python 3.11 | All code runs natively on Windows. No Unix-only deps |
 | Docker available | `docker-compose.yml` for Postgres + Redis only. App runs natively |
-| **LLM: Groq / OpenRouter** | NOT OpenAI. Use `langchain-groq` with `llama-3.3-70b-versatile` or `langchain-openai` with OpenRouter base URL |
+| **LLM: Groq / OpenRouter** | NOT OpenAI. Use `langchain-groq` with `openai/gpt-oss-120b` or `langchain-openai` with OpenRouter base URL |
 | **Deployment: Render** | User has no Railway account. Render free tier + paid upgrade for always-on demo |
 | **n8n: Cloud free tier** | No self-hosting (saves RAM) |
 | **Razorpay: Test account exists** | Real test-mode integration from day 1 |
@@ -30,7 +30,7 @@
 | MLflow model registry | Versioned `.joblib` artifact committed to repo |
 | Dedicated feature store | Postgres + Redis cache |
 | GrowthBook/full A/B platform | 4-table experiment schema + Spotify Confidence for stats |
-| OpenAI GPT-4o | Groq `llama-3.3-70b-versatile` (free, fast) or OpenRouter multi-model |
+| OpenAI GPT-4o | Groq `openai/gpt-oss-120b` (free, fast) or OpenRouter multi-model |
 
 ---
 
@@ -80,7 +80,7 @@ graph TB
 | Layer | Technology | Why |
 |---|---|---|
 | **Agent Framework** | LangGraph (Python) | State machines, checkpointing, conditional routing |
-| **LLM** | Groq `llama-3.3-70b-versatile` | Free tier, ~750 tokens/sec, structured JSON output. OpenRouter as fallback |
+| **LLM** | Groq `openai/gpt-oss-120b` | Free tier, ~750 tokens/sec, structured JSON output. OpenRouter as fallback |
 | **ML Models** | LightGBM + XGBoost | Recovery probability scoring — sub-50ms inference |
 | **Explainability** | SHAP (TreeSHAP) | Reason codes for every ML decision |
 | **Channel Selection** | MABWiser (Thompson Sampling) | Learns optimal SMS/email/WhatsApp per customer segment |
@@ -115,7 +115,7 @@ Pydantic Settings with env vars:
 - `GROQ_API_KEY` (primary LLM)
 - `OPENROUTER_API_KEY` (fallback LLM)
 - `LLM_PROVIDER`: `"groq"` | `"openrouter"` (default `"groq"`)
-- `LLM_MODEL`: default `"llama-3.3-70b-versatile"`
+- `LLM_MODEL`: default `"openai/gpt-oss-120b"`
 - `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
 - `DATABASE_URL`: default `sqlite+aiosqlite:///./revenueguard.db`
 - `REDIS_URL`: default `redis://localhost:6379`
@@ -235,7 +235,7 @@ START → enrich_ml → enrich_health → assign_experiment
 ```
 
 #### [NEW] `backend/agents/diagnosis_node.py`
-LLM diagnosis using **Groq** (`ChatGroq` with `llama-3.3-70b-versatile`). ML score + gateway health provided as immutable context. Output: structured JSON `{root_cause, is_transient, reasoning}`.
+LLM diagnosis using **Groq** (`ChatGroq` with `openai/gpt-oss-120b`). ML score + gateway health provided as immutable context. Output: structured JSON `{root_cause, is_transient, reasoning}`.
 
 #### [NEW] `backend/agents/strategy_node.py`
 Deterministic overrides first (gateway OPEN → DEFER, opted_out → STOP), then LLM reasons about retry vs nudge vs payment link.

@@ -62,3 +62,4 @@ n8n/data/
 # - data/test_batch.json            (523-event eval dataset)
 # - evals/results/summary.json      (precision/recall/F1 results)
 # - evals/results/rows.json         (per-case predictions)
+.neon
