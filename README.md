@@ -82,7 +82,7 @@ flowchart TD
 4. Fuse internal failure windows with Razorpay gateway signals.
 5. Assign the case to a stable control or treatment arm.
 6. Select a recovery strategy, channel, and timing.
-7. apply deterministic guardrails and high-value approval.
+7. Apply deterministic guardrails and high-value approval.
 8. Execute, audit, and publish live status updates.
 
 ## Evaluation evidence
