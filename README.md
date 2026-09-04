@@ -5,8 +5,8 @@
 An agentic system that detects failed Indian payments, scores recovery probability with ML, reasons about root cause with an LLM, and executes the optimal intervention — all within Razorpay's test-mode infrastructure.
 
 [![Demo Video](https://img.shields.io/badge/Demo-5%20min%20video-red?style=for-the-badge&logo=youtube)](https://your-video-link-here)
-[![Live Dashboard](https://img.shields.io/badge/Dashboard-Live-teal?style=for-the-badge)](https://revenueguard-ai.vercel.app)
-[![API](https://img.shields.io/badge/API-Render-blue?style=for-the-badge)](https://revenueguard-api.onrender.com/api/health)
+[![Live Dashboard](https://img.shields.io/badge/Dashboard-Vercel-teal?style=for-the-badge)](https://revenueguard-ai-five.vercel.app)
+[![API](https://img.shields.io/badge/API-Render-blue?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/api/health)
 
 ---
 
@@ -33,7 +33,7 @@ flowchart TD
         ML & GH --> EXP[A/B Assignment\nMD5 deterministic]
         EXP -->|CONTROL 80%| BL[Naive Retry\nBaseline]
         EXP -->|TREATMENT 20%| AG[LangGraph Agent]
-        AG --> D[Diagnose\nGroq LLaMA-3.3]
+        AG --> D[Diagnose\nGroq GPT-OSS]
         D --> S[Strategize\nDeterministic overrides first]
         S --> CH[Channel\nThompson Sampling]
         CH --> PE[Policy Engine\n6 guardrail checks]

@@ -14,7 +14,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, WebSocket, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.events import ConnectionManager, publish_event, relay_redis_events
@@ -213,7 +213,10 @@ async def metrics(db: AsyncSession = Depends(get_db)) -> dict:
         select(
             RecoveryCase.experiment_arm,
             func.count(),
-            func.sum(RecoveryCase.status == EventStatus.RECOVERED.value),
+            func.coalesce(
+                func.sum(case((RecoveryCase.status == EventStatus.RECOVERED.value, 1), else_=0)),
+                0,
+            ),
         ).group_by(RecoveryCase.experiment_arm)
     )
     by_arm = {
@@ -261,7 +264,10 @@ async def experiment_results(experiment_id: str, db: AsyncSession = Depends(get_
         select(
             RecoveryCase.experiment_arm,
             func.count(),
-            func.sum(RecoveryCase.status == EventStatus.RECOVERED.value),
+            func.coalesce(
+                func.sum(case((RecoveryCase.status == EventStatus.RECOVERED.value, 1), else_=0)),
+                0,
+            ),
         )
         .where(RecoveryCase.experiment_arm.in_(["control", "treatment"]))
         .group_by(RecoveryCase.experiment_arm)
