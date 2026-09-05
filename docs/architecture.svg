@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">RevenueGuard AI system architecture</title>
+  <desc id="desc">Razorpay payment failures enter a verified and idempotent FastAPI intake, are persisted and queued, processed through machine learning, gateway health and an experiment router, then evaluated by either a fixed baseline or a LangGraph recovery agent. Deterministic policy and human approval govern actions, while audit data powers the operations dashboard and experiment analysis.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/>
+      <stop offset="1" stop-color="#101c32"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#020617" flood-opacity=".35"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#67e8f9"/>
+    </marker>
+    <style>
+      .heading { font: 700 34px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subheading { font: 400 17px Inter, Segoe UI, Arial, sans-serif; fill: #94a3b8; }
+      .stage { font: 700 15px Inter, Segoe UI, Arial, sans-serif; letter-spacing: 1.8px; fill: #5eead4; }
+      .title { font: 700 21px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .body { font: 400 15px Inter, Segoe UI, Arial, sans-serif; fill: #cbd5e1; }
+      .small { font: 600 13px Inter, Segoe UI, Arial, sans-serif; fill: #93c5fd; }
+      .box { fill: #13233d; stroke: #334155; stroke-width: 1.5; }
+      .core { fill: #102f38; stroke: #2dd4bf; stroke-width: 2; }
+      .guard { fill: #2c2035; stroke: #c084fc; stroke-width: 2; }
+      .proof { fill: #282817; stroke: #facc15; stroke-width: 2; }
+      .line { fill: none; stroke: #67e8f9; stroke-width: 2.5; marker-end: url(#arrow); }
+      .line-dim { fill: none; stroke: #64748b; stroke-width: 2; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1600" height="7" fill="url(#accent)"/>
+
+  <text x="58" y="66" class="heading">RevenueGuard AI — decision and safety architecture</text>
+  <text x="58" y="99" class="subheading">From a failed Razorpay payment to an explainable, policy-safe action and measurable outcome</text>
+
+  <text x="58" y="143" class="stage">1 · INTAKE</text>
+  <text x="422" y="143" class="stage">2 · UNDERSTAND &amp; DECIDE</text>
+  <text x="1022" y="143" class="stage">3 · GOVERN</text>
+  <text x="1328" y="143" class="stage">4 · PROVE</text>
+
+  <g filter="url(#shadow)">
+    <rect x="48" y="166" width="310" height="122" rx="18" class="box"/>
+    <text x="72" y="202" class="title">Razorpay failure</text>
+    <text x="72" y="231" class="body">payment.failed webhook</text>
+    <text x="72" y="256" class="body">or deterministic demo event</text>
+    <rect x="48" y="320" width="310" height="150" rx="18" class="core"/>
+    <text x="72" y="356" class="title">FastAPI intake</text>
+    <text x="72" y="387" class="body">HMAC-SHA256 verification</text>
+    <text x="72" y="414" class="body">event-ID deduplication</text>
+    <text x="72" y="441" class="body">normalization + validation</text>
+    <rect x="48" y="502" width="310" height="155" rx="18" class="box"/>
+    <text x="72" y="538" class="title">Persist before queueing</text>
+    <text x="72" y="569" class="body">PostgreSQL / Neon case record</text>
+    <text x="72" y="596" class="body">Redis / Upstash work queue</text>
+    <text x="72" y="625" class="small">Durable, idempotent hand-off</text>
+  </g>
+
+  <path d="M203 288 V320" class="line"/>
+  <path d="M203 470 V502" class="line"/>
+  <path d="M358 580 H420" class="line"/>
+
+  <g filter="url(#shadow)">
+    <rect x="420" y="166" width="260" height="146" rx="18" class="core"/>
+    <text x="444" y="202" class="title">ML triage</text>
+    <text x="444" y="233" class="body">Recovery probability</text>
+    <text x="444" y="260" class="body">Top SHAP reason codes</text>
+    <text x="444" y="287" class="small">Score informs; never authorizes</text>
+
+    <rect x="710" y="166" width="260" height="146" rx="18" class="core"/>
+    <text x="734" y="202" class="title">Gateway intelligence</text>
+    <text x="734" y="233" class="body">Bank + rail health windows</text>
+    <text x="734" y="260" class="body">Circuit CLOSED / OPEN</text>
+    <text x="734" y="287" class="small">Retry, wait, or defer</text>
+
+    <rect x="420" y="350" width="550" height="112" rx="18" class="box"/>
+    <text x="444" y="386" class="title">Stable experiment router</text>
+    <text x="444" y="417" class="body">Per-case deterministic assignment → control or treatment</text>
+    <text x="444" y="442" class="small">Recovery Agent v1</text>
+
+    <rect x="420" y="504" width="228" height="126" rx="18" class="box"/>
+    <text x="444" y="540" class="title">Control</text>
+    <text x="444" y="572" class="body">Fixed retry baseline</text>
+    <text x="444" y="599" class="body">for honest comparison</text>
+
+    <rect x="680" y="504" width="290" height="164" rx="18" class="core"/>
+    <text x="704" y="540" class="title">Treatment: LangGraph</text>
+    <text x="704" y="572" class="body">Diagnose failure</text>
+    <text x="704" y="599" class="body">Choose strategy + timing</text>
+    <text x="704" y="626" class="body">Select recovery channel</text>
+    <text x="704" y="653" class="small">Recorded agent decision trace</text>
+  </g>
+
+  <path d="M550 312 V350" class="line"/>
+  <path d="M840 312 V350" class="line"/>
+  <path d="M695 462 V482 H534 V504" class="line"/>
+  <path d="M695 482 H825 V504" class="line"/>
+
+  <g filter="url(#shadow)">
+    <rect x="1018" y="166" width="268" height="206" rx="18" class="guard"/>
+    <text x="1042" y="202" class="title">Deterministic policy</text>
+    <text x="1042" y="234" class="body">Consent + quiet hours</text>
+    <text x="1042" y="261" class="body">Retry caps + cooldowns</text>
+    <text x="1042" y="288" class="body">Gateway circuit state</text>
+    <text x="1042" y="315" class="body">STOP / DEFER enforcement</text>
+    <text x="1042" y="344" class="small">AI cannot bypass these rules</text>
+
+    <rect x="1018" y="414" width="268" height="158" rx="18" class="guard"/>
+    <text x="1042" y="450" class="title">Human approval</text>
+    <text x="1042" y="482" class="body">Required above ₹50,000</text>
+    <text x="1042" y="509" class="body">Persisted approve / reject</text>
+    <text x="1042" y="539" class="small">Approval ≠ circuit override</text>
+
+    <rect x="1018" y="614" width="268" height="116" rx="18" class="box"/>
+    <text x="1042" y="650" class="title">Recovery outcome</text>
+    <text x="1042" y="681" class="body">Execute · defer · stop</text>
+    <text x="1042" y="708" class="small">Idempotent action record</text>
+  </g>
+
+  <path d="M970 585 H994 V269 H1018" class="line"/>
+  <path d="M648 567 H990 V269 H1018" class="line-dim"/>
+  <path d="M1152 372 V414" class="line"/>
+  <path d="M1152 572 V614" class="line"/>
+
+  <g filter="url(#shadow)">
+    <rect x="1324" y="166" width="228" height="174" rx="18" class="proof"/>
+    <text x="1348" y="202" class="title">Audit trail</text>
+    <text x="1348" y="234" class="body">ML explanations</text>
+    <text x="1348" y="261" class="body">Agent decisions</text>
+    <text x="1348" y="288" class="body">Policies + approvals</text>
+    <text x="1348" y="315" class="small">Case-level evidence</text>
+
+    <rect x="1324" y="382" width="228" height="146" rx="18" class="proof"/>
+    <text x="1348" y="418" class="title">Control Room</text>
+    <text x="1348" y="450" class="body">Next.js operations UI</text>
+    <text x="1348" y="477" class="body">API + live event updates</text>
+    <text x="1348" y="504" class="small">Human-operable workflow</text>
+
+    <rect x="1324" y="570" width="228" height="160" rx="18" class="proof"/>
+    <text x="1348" y="606" class="title">Experiment analysis</text>
+    <text x="1348" y="638" class="body">Baseline vs treatment</text>
+    <text x="1348" y="665" class="body">Lift + p-value + SRM</text>
+    <text x="1348" y="698" class="small">Measure before scaling</text>
+  </g>
+
+  <path d="M1286 672 H1304 V253 H1324" class="line"/>
+  <path d="M1438 340 V382" class="line"/>
+  <path d="M1438 528 V570" class="line"/>
+
+  <rect x="48" y="782" width="1504" height="70" rx="16" fill="#0f2137" stroke="#263b57"/>
+  <circle cx="78" cy="817" r="8" fill="#2dd4bf"/>
+  <text x="98" y="823" class="body">Core principle:</text>
+  <text x="218" y="823" class="title">AI reasons</text>
+  <text x="338" y="823" class="body">→</text>
+  <text x="370" y="823" class="title">policy decides</text>
+  <text x="520" y="823" class="body">→</text>
+  <text x="552" y="823" class="title">humans retain control</text>
+  <text x="778" y="823" class="body">→</text>
+  <text x="810" y="823" class="title">experiments prove value</text>
+</svg>

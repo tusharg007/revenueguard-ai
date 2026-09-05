@@ -91,27 +91,13 @@ Render's free service may cold-start; allow roughly 15–30 seconds on the first
 
 ## System architecture
 
-~~~mermaid
-flowchart TD
-    RZ[Razorpay webhook] -->|HMAC verification + idempotency| API[FastAPI]
-    API --> DB[(PostgreSQL)]
-    API --> Q[(Redis queue)]
-    Q --> W[Recovery worker]
-    W --> ML[LightGBM triage + SHAP]
-    W --> GH[Gateway health + circuit breaker]
-    ML --> EXP[A/B assignment]
-    GH --> EXP
-    EXP -->|Control| BL[Fixed retry baseline]
-    EXP -->|Treatment| AG[LangGraph recovery agent]
-    AG --> D[Diagnosis]
-    D --> S[Strategy]
-    S --> CH[Channel selection]
-    CH --> PE[Policy engine]
-    PE -->|amount > ₹50K| HITL[Human approval]
-    PE --> EX[Execute or simulate]
-    HITL --> EX
-    API --> UI[Next.js operations dashboard]
-~~~
+<p align="center">
+  <a href="docs/architecture.svg">
+    <img src="docs/architecture.svg" width="100%" alt="RevenueGuard AI architecture: Razorpay intake, ML and gateway intelligence, LangGraph decisioning, deterministic policy, human approval, audit trail, dashboard and experimentation">
+  </a>
+</p>
+
+The diagram is rendered as a repository-native SVG so it remains visible in GitHub's normal README view. Select it to open the full-resolution version.
 
 ### Decision path
 
