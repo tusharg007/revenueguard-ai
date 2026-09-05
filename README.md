@@ -91,13 +91,21 @@ Render's free service may cold-start; allow roughly 15–30 seconds on the first
 
 ## System architecture
 
+### High-level recovery flow
+
+<p align="center">
+  <a href="docs/architecture-flow.svg">
+    <img src="docs/architecture-flow.svg" width="100%" alt="RevenueGuard AI high-level architecture from Razorpay webhook intake through ML triage, gateway health, experiment routing, LangGraph recovery agent, deterministic policy, human approval, execution and dashboard">
+  </a>
+</p>
+
+### Decision and safety architecture
+
 <p align="center">
   <a href="docs/architecture.svg">
     <img src="docs/architecture.svg" width="100%" alt="RevenueGuard AI architecture: Razorpay intake, ML and gateway intelligence, LangGraph decisioning, deterministic policy, human approval, audit trail, dashboard and experimentation">
   </a>
 </p>
-
-The diagram is rendered as a repository-native SVG so it remains visible in GitHub's normal README view. Select it to open the full-resolution version.
 
 ### Decision path
 
