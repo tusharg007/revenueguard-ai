@@ -91,15 +91,13 @@ Render's free service may cold-start; allow roughly 15–30 seconds on the first
 
 ## System architecture
 
-### High-level recovery flow
-
 <p align="center">
   <a href="docs/architecture-flow.svg">
-    <img src="docs/architecture-flow.svg" width="100%" alt="RevenueGuard AI high-level architecture from Razorpay webhook intake through ML triage, gateway health, experiment routing, LangGraph recovery agent, deterministic policy, human approval, execution and dashboard">
+    <img src="docs/architecture-flow.svg" width="100%" alt="RevenueGuard AI system architecture from Razorpay webhook intake through ML triage, gateway health, experiment routing, LangGraph recovery agent, deterministic policy, human approval, execution and dashboard">
   </a>
 </p>
 
-### Decision and safety architecture
+### Detailed decision and safety architecture
 
 <p align="center">
   <a href="docs/architecture.svg">
