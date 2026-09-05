@@ -1,0 +1,6 @@
+work/
+raw/
+final/*.mp4
+logs/*.log
+logs/private*
+__pycache__/

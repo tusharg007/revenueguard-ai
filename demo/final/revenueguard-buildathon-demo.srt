@@ -1,0 +1,99 @@
+1
+00:00:00,000 --> 00:00:05,000
+Failed payments aren't all the same.
+
+2
+00:00:05,000 --> 00:00:09,000
+Blind retries can make things worse.
+
+3
+00:00:09,000 --> 00:00:12,000
+RevenueGuard AI
+
+4
+00:00:12,000 --> 00:00:20,000
+Understand failures. Recover safely. Prove the lift.
+
+5
+00:00:20,000 --> 00:00:28,000
+Turn failed payments into informed decisions.
+
+6
+00:00:28,000 --> 00:00:43,000
+Start with 50 failed payments.
+
+7
+00:00:43,000 --> 00:00:52,000
+Not every failure should be retried.
+
+8
+00:00:52,000 --> 00:01:04,000
+Now make the failure systemic.
+
+9
+00:01:04,000 --> 00:01:15,000
+A degraded payment rail. An OPEN circuit.
+
+10
+00:01:15,000 --> 00:01:25,000
+Suppress harmful retries. Wait for recovery.
+
+11
+00:01:25,000 --> 00:01:30,000
+First: is recovery worth attempting?
+
+12
+00:01:30,000 --> 00:01:39,000
+A probability—not a promise.
+
+13
+00:01:39,000 --> 00:01:50,000
+Every score comes with reason codes.
+
+14
+00:01:50,000 --> 00:02:02,000
+Diagnose. Check the rail. Choose the strategy.
+
+15
+00:02:02,000 --> 00:02:19,000
+The AI can reason.
+
+16
+00:02:19,000 --> 00:02:31,000
+But it cannot bypass policy.
+
+17
+00:02:31,000 --> 00:02:43,000
+₹75,000 at stake. Human approval required.
+
+18
+00:02:43,000 --> 00:02:54,000
+AI proposes. Policy decides. Humans retain control.
+
+19
+00:02:54,000 --> 00:03:04,000
+Approved—and still subject to the circuit breaker.
+
+20
+00:03:04,000 --> 00:03:19,000
+Connected to Razorpay. Strictly TEST mode.
+
+21
+00:03:19,000 --> 00:03:30,000
+Verify the signature. Reject the duplicate.
+
+22
+00:03:30,000 --> 00:03:36,000
+Now ask the question that matters.
+
+23
+00:03:36,000 --> 00:03:47,000
+Does it beat the baseline?
+
+24
+00:03:47,000 --> 00:03:59,000
++9.9 percentage-point recovery lift
+
+25
+00:03:59,000 --> 00:04:04,000
+RevenueGuard AI

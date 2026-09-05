@@ -1,0 +1,6 @@
+{
+  "name": "revenueguard-demo-recorder",
+  "private": true,
+  "description": "Isolated product-film browser automation",
+  "dependencies": { "playwright": "^1.58.0" }
+}
