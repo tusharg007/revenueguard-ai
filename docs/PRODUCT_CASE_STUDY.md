@@ -1,8 +1,19 @@
-# RevenueGuard AI — Product Case Study
+# RevenueGuard AI — Product Case Study & Lightweight PRD
 
 > Razorpay AI Buildathon 2026 · Track 03: AI Revenue Recovery
 >
 > [Live product](https://revenueguard-ai-five.vercel.app) · [Product demo](https://www.youtube.com/watch?v=LvwdreXkLb4) · [Source](https://github.com/tusharg007/revenueguard-ai)
+
+## Executive Summary
+
+| | |
+|---|---|
+| **User** | Payments / revenue operations teams |
+| **Problem** | Fixed retries ignore failure cause, gateway health, customer context, and risk |
+| **MVP** | Diagnose failure → recommend action → apply deterministic policy → request approval when needed → measure outcome |
+| **Primary metric** | Recovery rate versus a fixed-retry baseline |
+| **Guardrail** | Zero policy-violating automated actions |
+| **Evidence** | 523-event held-out offline synthetic evaluation; deployed product and a separate Razorpay test-mode demo |
 
 ## 1. User & Problem
 
@@ -102,7 +113,17 @@ A local failure can be worth retrying; a rail-wide failure calls for restraint. 
 
 Persisted reason codes, decisions, actions, and approvals make individual cases reviewable. Stable per-case assignment makes the aggregate comparison reproducible. A future merchant experiment should assess customer-level assignment to reduce cross-case interference.
 
-## 7. Success Metrics
+## 7. Where AI Stops and Product Judgment Starts
+
+Codex helped accelerate demo automation and documentation, while AI assistance helped explore implementation alternatives, interface copy, and synthetic scenarios. I kept these decisions outside model authority:
+
+- The LLM can recommend an action; deterministic policy decides whether it is allowed.
+- A high-value non-STOP action requires human approval before execution.
+- Approval does not override an unsafe gateway or circuit state.
+- Offline synthetic lift is reported separately from production impact.
+- Product scope, success metrics, guardrails, and the ₹50,000 prototype threshold required product judgment rather than delegation to a model.
+
+## 8. Success Metrics
 
 | Type | Metric | Product question |
 |---|---|---|
@@ -115,7 +136,7 @@ Persisted reason codes, decisions, actions, and approvals make individual cases 
 
 Report live operational metrics separately from offline evaluation. A scheduled retry, queued notification, or approved case is not itself a successful recovery.
 
-## 8. Experiment
+## 9. Experiment
 
 **Control:** fixed retry behavior.
 
@@ -125,7 +146,7 @@ The committed [evaluation summary](../evals/results/summary.json) covers **523 h
 
 **Evidence boundary:** This is an **OFFLINE SYNTHETIC evaluation** with simulated recovery outcomes. It does not demonstrate production payment recovery or end-to-end live LLM uplift. The two-sided 95% interval in the artifact crosses zero, so the one-sided result should not be described as two-sided 95% significance. A real merchant rollout would require production instrumentation, risk review, and a prospective experiment.
 
-## 9. What I Would Test Next
+## 10. What I Would Test Next
 
 1. **Retry timing:** compare immediate, cooldown-based, and gateway-recovery-triggered attempts while monitoring customer friction.
 2. **Communication channel:** measure recovery and opt-outs across email, SMS, WhatsApp, and payment links where consent and delivery integrations allow.
@@ -135,13 +156,13 @@ The committed [evaluation summary](../evals/results/summary.json) covers **523 h
 
 Each test needs a baseline, predefined success and guardrail metrics, and enough observations to support a decision.
 
-## 10. Build Workflow
+## 11. Build Workflow
 
 The build followed a product-to-evidence loop:
 
 1. **Problem decomposition:** split payment recovery into intake, diagnosis, gateway context, recommendation, policy, approval, and measurement.
 2. **Specification:** define operator decisions, observable case states, hard constraints, and what the demo could honestly prove.
-3. **AI-assisted prototyping:** use AI assistance to accelerate implementation alternatives, interface copy, synthetic scenarios, and demo automation.
+3. **AI-assisted prototyping:** use AI assistance to explore implementation alternatives, interface copy, and synthetic scenarios. I used Codex to iterate the Playwright demo capture and video timeline. Reviewing the recorded UI and integration evidence led me to show a real Razorpay test order separately from the labelled locally signed webhook replay, so the film would not imply a Razorpay-origin webhook.
 4. **Manual code review:** check payment integration boundaries, persistence, idempotency, approval paths, and product claims against code.
 5. **Tests:** exercise API and worker behavior; inspect representative cases, approval transitions, and evaluation artifacts.
 6. **Deployment:** connect the Next.js frontend, FastAPI backend, data services, and Razorpay test-mode configuration.
