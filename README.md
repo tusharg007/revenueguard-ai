@@ -4,6 +4,8 @@
 
 RevenueGuard AI turns failed-payment events into explainable, policy-safe recovery actions. It combines ML triage, gateway-health intelligence, a LangGraph decision agent, deterministic guardrails, human approval for high-value cases, and an A/B evaluation framework.
 
+**[Product Case Study](docs/PRODUCT_CASE_STUDY.md) | [Live Product](https://revenueguard-ai-five.vercel.app) | [API Docs](https://revenueguard-ai-2.onrender.com/docs) | [GitHub](https://github.com/tusharg007/revenueguard-ai)**
+
 [![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-Vercel-00897B?style=for-the-badge)](https://revenueguard-ai-five.vercel.app)
 [![API Health](https://img.shields.io/badge/API-Healthy-2563EB?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/api/health)
 [![API Docs](https://img.shields.io/badge/OpenAPI-Docs-6B7280?style=for-the-badge)](https://revenueguard-ai-2.onrender.com/docs)
